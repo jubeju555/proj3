@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "disjoint.h"
+#include <map>
 
 using namespace std;
 
@@ -85,11 +86,9 @@ Superball::Superball(int argc, char **argv)
 int main(int argc, char **argv)
 {
   Superball *s;
- 
   s = new Superball(argc, argv);
-
   DisjointSetByRankWPC ds(s->row*s->column);
-
+  
   for (int i = 0; i < s->row; i++)
   {
     for (int j = 0; j < s->column; j++)
@@ -102,15 +101,39 @@ int main(int argc, char **argv)
       if (s->board[currentindex] == s->board[currentindex + 1]){
         ds.Union(currentindex, currentindex + 1);
       }
-      // this checks the box above possibly?
+      // this checks the box below
       if (s->board[currentindex] == s->board[currentindex - s->column]){
-        ds.Union(currentindex, currentindex - s->column);
+        ds.Union(currentindex, currentindex + s->column);
       }
       
     }
     
   }
-  
+ 
+  map<int, int> scoringset;
+  map<int, bool> goal;
+
+  for (int i = 0; i < s->row; i++)
+  {
+    for (int j = 0; j < s->column; j++)
+  {
+    int currentindex = i * s->column + j;
+
+    if (s->board[currentindex] == '.' || s->board[currentindex] == '*'){
+      continue;
+    }
+    int root = ds.Find(currentindex);
+    if (scoringset.find(root) == scoringset.end()){
+      scoringset[root] = 1;
+    }
+    else{
+      scoringset[root]++;
+    }
+    if (s->goals[currentindex] == 1){
+      goal[root] = true;
+    }
+  }
+}
   ds.Print();
   
 }
