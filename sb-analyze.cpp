@@ -5,6 +5,7 @@
 
 #include "disjoint.h"
 #include <map>
+#include <unordered_map>
 
 using namespace std;
 
@@ -97,12 +98,12 @@ int main(int argc, char **argv)
       if (s->board[currentindex] == '.' || s->board[currentindex] == '*'){
         continue;
       }
-      // this checks if the currentindex is the same as the one to the right
-      if (s->board[currentindex] == s->board[currentindex + 1]){
+      // this checks if the currentindex is the same as the one to the right and checks out of bounds
+      if (j + 1 < s->column && s->board[currentindex] == s->board[currentindex + 1]){
         ds.Union(currentindex, currentindex + 1);
       }
-      // this checks the box below
-      if (s->board[currentindex] == s->board[currentindex - s->column]){
+      // this checks the one below and has a checks out of bounds
+      if (i + 1 < s->row && s->board[currentindex] == s->board[currentindex + s->column]){
         ds.Union(currentindex, currentindex + s->column);
       }
       
@@ -110,7 +111,7 @@ int main(int argc, char **argv)
     
   }
  
-  map<int, int> scoringset;
+  unordered_map<int, int> scoringset;
   map<int, bool> goal;
 
   for (int i = 0; i < s->row; i++)
@@ -122,16 +123,16 @@ int main(int argc, char **argv)
     if (s->board[currentindex] == '.' || s->board[currentindex] == '*'){
       continue;
     }
+   // find the root of the currentindex
     int root = ds.Find(currentindex);
+    // if the root is not in the scoringset, add it to the scoringset else increment the value
     if (scoringset.find(root) == scoringset.end()){
       scoringset[root] = 1;
     }
-    else{
       scoringset[root]++;
-    }
-    if (s->goals[currentindex] == 1){
-      goal[root] = true;
-    }
+    // if the currentindex is a goal, set the goal to true
+    if (s->goals[currentindex] == goal[root]) goal[root] = true;
+
   }
 }
   ds.Print();
