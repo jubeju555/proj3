@@ -10,13 +10,18 @@ using namespace std;
 class Superball {
   public:
     Superball(int argc, char **argv);
-    int r;
-    int c;
+    int row;
+    int column;
     int mss;
     int empty;
     vector <int> board;
     vector <int> goals;
     vector <int> colors;
+  private:
+
+  // DisjointSetByRankWPC ds;
+  // vector<vector<int> > board;
+  int rows, cols;
 };
 
 void usage(const char *s) 
@@ -33,8 +38,8 @@ Superball::Superball(int argc, char **argv)
 
   if (argc != 5) usage(NULL);
 
-  if (sscanf(argv[1], "%d", &r) == 0 || r <= 0) usage("Bad rows");
-  if (sscanf(argv[2], "%d", &c) == 0 || c <= 0) usage("Bad cols");
+  if (sscanf(argv[1], "%d", &row) == 0 || row <= 0) usage("Bad rows");
+  if (sscanf(argv[2], "%d", &column) == 0 || column <= 0) usage("Bad cols");
   if (sscanf(argv[3], "%d", &mss) == 0 || mss <= 0) usage("Bad min-score-size");
 
   colors.resize(256, 0);
@@ -47,31 +52,31 @@ Superball::Superball(int argc, char **argv)
     colors[toupper(argv[4][i])] = 2+i;
   }
 
-  board.resize(r*c);
-  goals.resize(r*c, 0);
+  board.resize(row*column);
+  goals.resize(row*column, 0);
 
   empty = 0;
 
-  for (i = 0; i < r; i++) {
+  for (i = 0; i < row; i++) {
     if (!(cin >> s)) {
       fprintf(stderr, "Bad board: not enough rows on standard input\n");
       exit(1);
     }
-    if ((int) s.size() != c) {
+    if ((int) s.size() != column) {
       fprintf(stderr, "Bad board on row %d - wrong number of characters.\n", i);
       exit(1);
     }
-    for (j = 0; j < c; j++) {
+    for (j = 0; j < column; j++) {
       if (s[j] != '*' && s[j] != '.' && colors[s[j]] == 0) {
         fprintf(stderr, "Bad board row %d - bad character %c.\n", i, s[j]);
         exit(1);
       }
-      board[i*c+j] = s[j];
-      if (board[i*c+j] == '.') empty++;
-      if (board[i*c+j] == '*') empty++;
-      if (isupper(board[i*c+j]) || board[i*c+j] == '*') {
-        goals[i*c+j] = 1;
-        board[i*c+j] = tolower(board[i*c+j]);
+      board[i*column+j] = s[j];
+      if (board[i*column+j] == '.') empty++;
+      if (board[i*column+j] == '*') empty++;
+      if (isupper(board[i*column+j]) || board[i*column+j] == '*') {
+        goals[i*column+j] = 1;
+        board[i*column+j] = tolower(board[i*column+j]);
       }
     }
   }
@@ -83,8 +88,29 @@ int main(int argc, char **argv)
  
   s = new Superball(argc, argv);
 
-  DisjointSetByRankWPC ds(s->r*s->c);
+  DisjointSetByRankWPC ds(s->row*s->column);
 
+  for (int i = 0; i < s->row; i++)
+  {
+    for (int j = 0; j < s->column; j++)
+    {
+      int currentindex = i * s->column + j;
+      if (s->board[currentindex] == '.' || s->board[currentindex] == '*'){
+        continue;
+      }
+      // this checks if the currentindex is the same as the one to the right
+      if (s->board[currentindex] == s->board[currentindex + 1]){
+        ds.Union(currentindex, currentindex + 1);
+      }
+      // this checks the box above possibly?
+      if (s->board[currentindex] == s->board[currentindex - s->column]){
+        ds.Union(currentindex, currentindex - s->column);
+      }
+      
+    }
+    
+  }
+  
   ds.Print();
   
 }

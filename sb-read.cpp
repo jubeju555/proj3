@@ -21,6 +21,7 @@ void usage(const char *s)
 {
   fprintf(stderr, "usage: sb-read rows cols min-score-size colors\n");
   if (s != NULL) fprintf(stderr, "%s\n", s);
+  
   exit(1);
 }
 
