@@ -2,10 +2,10 @@
 #include <cstring>
 #include <iostream>
 #include <vector>
-
 #include "disjoint.h"
 #include <map>
 #include <unordered_map>
+#include <algorithm>
 
 using namespace std;
 
@@ -100,11 +100,21 @@ int main(int argc, char **argv)
       }
       // this checks if the currentindex is the same as the one to the right and checks out of bounds
       if (j + 1 < s->column && s->board[currentindex] == s->board[currentindex + 1]){
-        ds.Union(currentindex, currentindex + 1);
+        if (ds.Find(currentindex) != -1 && ds.Find(currentindex + 1) != -1)
+        {
+          ds.Union(currentindex, currentindex + 1);
+
+        }
+        
       }
       // this checks the one below and has a checks out of bounds
       if (i + 1 < s->row && s->board[currentindex] == s->board[currentindex + s->column]){
-        ds.Union(currentindex, currentindex + s->column);
+        
+        if (ds.Find(currentindex) != -1 && ds.Find(currentindex + s->column) != -1)
+        {
+          ds.Union(currentindex, currentindex + 1);
+
+        }
       }
       
     }
@@ -132,6 +142,7 @@ int main(int argc, char **argv)
       scoringset[root]++;
     // if the currentindex is a goal, set the goal to true
     if (s->goals[currentindex] == goal[root]) goal[root] = true;
+
 
   }
 }
