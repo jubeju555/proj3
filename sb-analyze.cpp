@@ -115,7 +115,6 @@ int main(int argc, char **argv)
     if (s->goals[currentindex] && !scoregoal[root]) scoregoal[root] = true;
     if (s->goals[currentindex] == scoregoal[root]) scoregoal[root] = true;
 
-
   }
 } 
 
@@ -131,23 +130,19 @@ for (int i = 0; i < s->row; i++)
       if (j + 1 < s->column && s->board[currentindex] == s->board[currentindex + 1]){
         if (ds.Find(currentindex) != -1 && ds.Find(currentindex + 1) != -1)
         {
-          ds.Union(currentindex, currentindex + s->column);
+          ds.Union(ds.Find(currentindex), ds.Find(currentindex + 1));
 
-        }
-        
+        }   
       }
       // this checks the one below and has a checks out of bounds
       if (i + 1 < s->row && s->board[currentindex] == s->board[currentindex + s->column]){
         
         if (ds.Find(currentindex) != -1 && ds.Find(currentindex + s->column) != -1)
         {
-          ds.Union(currentindex, currentindex + 1);
-
+          ds.Union(ds.Find(currentindex), ds.Find(currentindex + s->column));
         }
       }
-      
-    }
-    
+    }   
   }
   ds.Print();
   
