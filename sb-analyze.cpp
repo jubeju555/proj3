@@ -90,7 +90,36 @@ int main(int argc, char **argv)
   s = new Superball(argc, argv);
   DisjointSetByRankWPC ds(s->row*s->column);
   
+ 
+ 
+  unordered_map<int, int> scoringset;
+  map<int, bool> scoregoal;
+
   for (int i = 0; i < s->row; i++)
+  {
+    for (int j = 0; j < s->column; j++)
+  {
+    int currentindex = i * s->column + j;
+
+    if (s->board[currentindex] == '.' || s->board[currentindex] == '*'){
+      continue;
+    }
+   // find the root of the currentindex
+    int root = ds.Find(currentindex);
+    // if the root is not in the scoringset, add it to the scoringset else increment the value
+    if (scoringset.find(root) == scoringset.end()){
+      scoringset[root] = 1;
+    } else {
+      scoringset[root]++;
+    }
+    if (s->goals[currentindex] && !scoregoal[root]) scoregoal[root] = true;
+    if (s->goals[currentindex] == scoregoal[root]) scoregoal[root] = true;
+
+
+  }
+} 
+
+for (int i = 0; i < s->row; i++)
   {
     for (int j = 0; j < s->column; j++)
     {
@@ -102,7 +131,7 @@ int main(int argc, char **argv)
       if (j + 1 < s->column && s->board[currentindex] == s->board[currentindex + 1]){
         if (ds.Find(currentindex) != -1 && ds.Find(currentindex + 1) != -1)
         {
-          ds.Union(currentindex, currentindex + 1);
+          ds.Union(currentindex, currentindex + s->column);
 
         }
         
@@ -120,32 +149,6 @@ int main(int argc, char **argv)
     }
     
   }
- 
-  unordered_map<int, int> scoringset;
-  map<int, bool> goal;
-
-  for (int i = 0; i < s->row; i++)
-  {
-    for (int j = 0; j < s->column; j++)
-  {
-    int currentindex = i * s->column + j;
-
-    if (s->board[currentindex] == '.' || s->board[currentindex] == '*'){
-      continue;
-    }
-   // find the root of the currentindex
-    int root = ds.Find(currentindex);
-    // if the root is not in the scoringset, add it to the scoringset else increment the value
-    if (scoringset.find(root) == scoringset.end()){
-      scoringset[root] = 1;
-    }
-      scoringset[root]++;
-    // if the currentindex is a goal, set the goal to true
-    if (s->goals[currentindex] == goal[root]) goal[root] = true;
-
-
-  }
-}
   ds.Print();
   
 }
