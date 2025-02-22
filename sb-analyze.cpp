@@ -6,7 +6,6 @@
 #include <map>
 #include <unordered_map>
 #include <algorithm>
-
 using namespace std;
 
 class Superball
@@ -25,6 +24,12 @@ private:
   // DisjointSetByRankWPC ds;
   // vector<vector<int> > board;
   int rows, cols;
+};
+
+struct Metadata
+{
+  int size;
+  bool has_goal;
 };
 
 void usage(const char *s)
@@ -136,8 +141,7 @@ int main(int argc, char **argv)
     }
   }
 
-  unordered_map<int, int> scoringset;
-  map<int, bool> scoregoal;
+  unordered_map<int, Metadata> scoringset;
 
   for (int i = 0; i < s->row; i++)
   {
@@ -154,31 +158,33 @@ int main(int argc, char **argv)
       // if the root is not in the scoringset, add it to the scoringset else increment the value
       if (scoringset.find(root) == scoringset.end())
       {
-        scoringset[root] = 1;
+        scoringset[root] = {1, s->goals[currentindex] != 0};
       }
       else
       {
-        scoringset[root]++;
+        scoringset[root].size++;
+        if (s->goals[currentindex])
+        {
+          scoringset[root].has_goal = true;
+        }
       }
-      if (s->goals[currentindex] && !scoregoal[root])
-        scoregoal[root] = true;
-      if (s->goals[currentindex] == scoregoal[root])
-        scoregoal[root] = true;
     }
   }
 
-  ds.Print();
-  printf("Scoring set: \n");
-  for (size_t i = 0; i < s->row * s->column; i++)
-  {
-    int root = ds.Find(i);
+  // ds.Print();
 
-    if (scoringset.find(root) != scoringset.end())
+  printf("Scoring set: \n");
+  for (unordered_map<int, Metadata>::iterator it = scoringset.begin(); it != scoringset.end(); it++)
+  {
+    int root = it->first;
+    Metadata data = it->second;
+    // index starts at 0 add 1
+    if (data.size >= s->mss && data.has_goal)
     {
-      int grow = root / s->column;
-      int gcol = root % s->column;
-      printf("Root: %d, Size: %d, Goal: %d, Row: %d, Col: %d\n", root, scoringset[root], scoregoal[root], grow, gcol);
+      int Grow = root / s->column + 1;
+      int Gcol = root % s->column - 1;
+      char scolor = s->board[root];
+      printf("  Size: %2d  Char: %c  Scoring Cell: %d,%d\n", data.size, scolor, Grow, Gcol);
     }
-    scoregoal[i] = false;
   }
 }
