@@ -163,11 +163,13 @@ int main(int argc, char **argv)
       else
       {
         scoringset[root].size++;
-        if (s->goals[currentindex])
-        {
-          scoringset[root].has_goal = true;
-        }
+        // if (s->goals[currentindex])
+        // {
+        //   scoringset[root].has_goal = true;
+        // }
+        scoringset[root].has_goal |= (s->goals[currentindex] != 0);
       }
+
     }
   }
 
@@ -176,16 +178,16 @@ int main(int argc, char **argv)
   printf("Scoring set: \n");
   for (unordered_map<int, Metadata>::iterator it = scoringset.begin(); it != scoringset.end(); it++)
   {
+
     int root = it->first;
     Metadata data = it->second;
     // index starts at 0 add 1
     if (data.size >= s->mss && data.has_goal)
     {
       int Grow = root / s->column + 1;
-      int Gcol = root % s->column + 1;
+      int Gcol = root % s->column - 1;
       char scolor = s->board[root];
       printf("  Size: %2d  Char: %c  Scoring Cell: %d,%d\n", data.size, scolor, Grow, Gcol);
-     
     }
   }
 }
