@@ -182,9 +182,10 @@ int main(int argc, char **argv)
     if (data.size >= s->mss && data.has_goal)
     {
       int Grow = root / s->column + 1;
-      int Gcol = root % s->column - 1;
+      int Gcol = root % s->column + 1;
       char scolor = s->board[root];
       printf("  Size: %2d  Char: %c  Scoring Cell: %d,%d\n", data.size, scolor, Grow, Gcol);
+     
     }
   }
 }
