@@ -172,14 +172,14 @@ int main(int argc, char **argv)
 
   // ds.Print();
 
-  printf("Scoring set: \n");
+  printf("Scoring sets: \n");
   for (unordered_map<int, Metadata>::iterator it = scoringset.begin(); it != scoringset.end(); it++)
   {
 
     int root = it->first;
     Metadata data = it->second;
     // index starts at 0 add 1
-    if (data.size >= s->mss && data.has_goal)
+    if (data.size >= s->mss && data.has_goal && data.size > 1)
     {
       int Grow = root / s->column + 1;
       int Gcol = root % s->column - 1;
