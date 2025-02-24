@@ -149,10 +149,7 @@ int main(int argc, char **argv)
     {
       int currentindex = i * s->column + j;
 
-      if (s->board[currentindex] == '.' || s->board[currentindex] == '*')
-      {
-        continue;
-      }
+      if (s->board[currentindex] == '.' || s->board[currentindex] == '*') continue;
       // find the root of the currentindex
       int root = ds.Find(currentindex);
       // if the root is not in the scoringset, add it to the scoringset else increment the value
@@ -169,7 +166,7 @@ int main(int argc, char **argv)
         // }
         scoringset[root].has_goal |= (s->goals[currentindex] != 0);
       }
-
+      
     }
   }
 
