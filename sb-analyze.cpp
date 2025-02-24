@@ -178,11 +178,10 @@ int main(int argc, char **argv)
 
     int root = it->first;
     Metadata data = it->second;
-    // index starts at 0 add 1
     if (data.size >= s->mss && data.has_goal && data.size > 1)
     {
       int Grow = root / s->column + 1;
-      int Gcol = root % s->column + 1;
+      int Gcol = root % s->column;
       char scolor = s->board[root];
       printf("  Size: %2d  Char: %c  Scoring Cell: %d,%d\n", data.size, scolor, Grow, Gcol);
     }
