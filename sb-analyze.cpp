@@ -142,8 +142,8 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
       
       if (scoringset.find(root) == scoringset.end())
       {
-        scoringset[root] = {1, s->goals[currentindex] != 0};
-        if (s->goals[currentindex]) scoringcell[root] = currentindex;
+        scoringset[root] = {1, s->goals[currentindex] != 0,s->goals[currentindex] ? currentindex: -1};
+        // if (s->goals[currentindex]) scoringcell[root] = currentindex;
       }
       else
       {
@@ -151,9 +151,14 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
         // its storing them all in the same place, which is why its grabbing random values for scoring cell
         scoringset[root].size++;
         scoringset[root].has_goal |= (s->goals[currentindex] != 0);
-
-        if (s->goals[currentindex]) scoringcell[root] = currentindex;
+        // scoringset[root].scorecell = currentindex;
+        if (s->goals[currentindex]) {
+          // Pick the top-left most goal cell
+          if (scoringset[root].scorecell == -1 || currentindex < scoringset[root].scorecell) {
+              scoringset[root].scorecell = currentindex;
+          }
       }
+          }
     }
   }
 }
@@ -163,13 +168,14 @@ void print(Superball *s, unordered_map<int, Metadata> &scoringset)
   printf("Scoring sets: \n");
   for (unordered_map<int, Metadata>::iterator it = scoringset.begin(); it != scoringset.end(); it++)
   {
+    // double check what these 2 lines are doing
     int root = it->first;
     Metadata data = it->second;
-    if (data.size >= s->mss && data.has_goal && data.size > 1)
+    if (data.size >= s->mss && data.has_goal && data.size > 1 && data.scorecell != -1)
     {
-      int Grow = root / s->column + 1;
-      int Gcol = root % s->column ;
-      char scolor = s->board[root];
+      int Grow = data.scorecell / s->column;
+      int Gcol = data.scorecell % s->column ;
+      char scolor = s->board[data.scorecell];
       printf("  Size: %2d  Char: %c  Scoring Cell: %d,%d\n", data.size, scolor, Grow, Gcol);
     }
   }
