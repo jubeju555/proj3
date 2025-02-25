@@ -26,11 +26,7 @@ private:
   int rows, cols;
 };
 
-struct Metadata
-{
-  int size;
-  bool has_goal;
-};
+
 
 void usage(const char *s)
 {
@@ -107,83 +103,90 @@ Superball::Superball(int argc, char **argv)
   }
 }
 
-int main(int argc, char **argv)
+struct Metadata
 {
-  Superball *s;
-  s = new Superball(argc, argv);
-  DisjointSetByRankWPC ds(s->row * s->column);
+  int size;
+  bool has_goal;
+  int scorecell;
+};
 
+void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadata> &scoringset, unordered_map<int, int> &scoringcell)
+{
   for (int i = 0; i < s->row; i++)
   {
     for (int j = 0; j < s->column; j++)
     {
       int currentindex = i * s->column + j;
-      if (s->board[currentindex] == '.' || s->board[currentindex] == '*')
-      {
-        continue;
-      }
-      // this checks if the currentindex is the same as the one to the right and checks out of bounds
+      if (s->board[currentindex] == '.' || s->board[currentindex] == '*') continue;
+
+      // this checks the column to the right
       if (j + 1 < s->column && s->board[currentindex] == s->board[currentindex + 1])
       {
-        if (ds.Find(currentindex) != -1 && ds.Find(currentindex + 1) != -1)
-        {
-          ds.Union(ds.Find(currentindex), ds.Find(currentindex + 1));
-        }
+        ds.Union(ds.Find(currentindex), ds.Find(currentindex + 1));
       }
-      // this checks the one below and has a checks out of bounds
+      // this checks the row below
       if (i + 1 < s->row && s->board[currentindex] == s->board[currentindex + s->column])
       {
-        if (ds.Find(currentindex) != -1 && ds.Find(currentindex + s->column) != -1)
-        {
-          ds.Union(ds.Find(currentindex), ds.Find(currentindex + s->column));
-        }
+        ds.Union(ds.Find(currentindex), ds.Find(currentindex + s->column));
       }
     }
   }
 
-  unordered_map<int, Metadata> scoringset;
-
   for (int i = 0; i < s->row; i++)
   {
     for (int j = 0; j < s->column; j++)
     {
       int currentindex = i * s->column + j;
-
       if (s->board[currentindex] == '.' || s->board[currentindex] == '*') continue;
-      // find the root of the currentindex
       int root = ds.Find(currentindex);
-      // if the root is not in the scoringset, add it to the scoringset else increment the value
+      
       if (scoringset.find(root) == scoringset.end())
       {
         scoringset[root] = {1, s->goals[currentindex] != 0};
+        if (s->goals[currentindex]) scoringcell[root] = currentindex;
       }
       else
       {
+        // need to store where the stuff is in scoring cell into scorecell
+        // its storing them all in the same place, which is why its grabbing random values for scoring cell
         scoringset[root].size++;
-        // if (s->goals[currentindex])
-        // {
-        //   scoringset[root].has_goal = true;
-        // }
         scoringset[root].has_goal |= (s->goals[currentindex] != 0);
+
+        if (s->goals[currentindex]) scoringcell[root] = currentindex;
       }
-      
     }
   }
+}
 
-  // ds.Print();
-
+void print(Superball *s, unordered_map<int, Metadata> &scoringset)
+{
   printf("Scoring sets: \n");
   for (unordered_map<int, Metadata>::iterator it = scoringset.begin(); it != scoringset.end(); it++)
   {
-
     int root = it->first;
     Metadata data = it->second;
     if (data.size >= s->mss && data.has_goal && data.size > 1)
     {
       int Grow = root / s->column + 1;
-      int Gcol = root % s->column;
+      int Gcol = root % s->column ;
       char scolor = s->board[root];
       printf("  Size: %2d  Char: %c  Scoring Cell: %d,%d\n", data.size, scolor, Grow, Gcol);
     }
   }
+}
+
+int main(int argc, char **argv)
+{
+  Superball *s;
+  s = new Superball(argc, argv);
+  DisjointSetByRankWPC ds(s->row * s->column);
+  unordered_map<int, Metadata> scoringset;
+  unordered_map<int, int> scoringcell;
+
+  sbanalyze(s, ds, scoringset, scoringcell);
+  print(s, scoringset);
+  // ds.print();
+
+  delete s;
+  return 0;
 }
