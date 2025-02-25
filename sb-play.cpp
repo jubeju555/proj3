@@ -88,9 +88,16 @@ void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadat
 
 }
 
-int main()
+int main(int argc, char **argv)
 {
-
+  Superball *s;
+  s = new Superball(argc, argv);
+  DisjointSetByRankWPC ds(s->row * s->column);
+  unordered_map<int, Metadata> scoringset;
+  unordered_map<int, int> scoringcell;
   cout << "This program doesn't do anything yet.\n";
+  sbanalyze(s,ds,scoringset,scoringcell);
+  bestmove(s, ds, scoringset);
+
   return 0;
 }
