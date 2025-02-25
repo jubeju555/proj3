@@ -7,16 +7,17 @@
 
 using namespace std;
 
-class Superball {
-  public:
-    Superball(int argc, char **argv);
-    int row;
-    int column;
-    int mss;
-    int empty;
-    vector <int> board;
-    vector <int> goals;
-    vector <int> colors;
+class Superball
+{
+public:
+  Superball(int argc, char **argv);
+  int row;
+  int column;
+  int mss;
+  int empty;
+  vector<int> board;
+  vector<int> goals;
+  vector<int> colors;
 };
 struct Metadata
 {
@@ -24,15 +25,16 @@ struct Metadata
   bool has_goal;
   int scorecell;
 };
-// void usage(const char *s) 
+// void usage(const char *s)
 // {
 //   fprintf(stderr, "usage: sb-read rows cols min-score-size colors\n");
 //   if (s != NULL) fprintf(stderr, "%s\n", s);
-  
+
 //   exit(1);
 // }
- 
-int swap(int &a, int &b) {
+
+int swap(int &a, int &b)
+{
   int temp = a;
   a = b;
   b = temp;
@@ -61,12 +63,34 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
     }
   }
 }
-void bestmove(Superball *s, DisjointSetByRankWPC &ds){
-  
+void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadata> &scoringset)
+{
+
+  for (unordered_map<int, Metadata>::iterator it = scoringset.begin(); it != scoringset.end(); it++)
+  {
+    Metadata data = it->second;
+
+    if (data.size >= s->mss && data.has_goal && data.size > 1 && data.scorecell != -1)
+    {
+      int Grow = data.scorecell / s->column;
+      int Gcol = data.scorecell % s->column;
+      printf("Score at %d, %d\n", Grow, Gcol);
+    }
+    return;
+  }
+   for (int i = 0; i < s->row; i++) {
+        for (int j = 0; j < s->column - 1; j++) {
+            swap(s->board[i * s->column + j], s->board[i * s->column + j + 1]);
+            cout << "Swap: " << i << "," << j << " with " << i << "," << j + 1 << endl;
+            return;
+        }
+    }
+
 }
-int main() {
+
+int main()
+{
 
   cout << "This program doesn't do anything yet.\n";
   return 0;
-
 }

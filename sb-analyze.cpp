@@ -170,7 +170,7 @@ void print(Superball *s, unordered_map<int, Metadata> &scoringset)
   for (unordered_map<int, Metadata>::iterator it = scoringset.begin(); it != scoringset.end(); it++)
   {
     // double check what these 2 lines are doing
-    int root = it->first;
+    // int root = it->first;
     Metadata data = it->second;
     if (data.size >= s->mss && data.has_goal && data.size > 1 && data.scorecell != -1)
     {
