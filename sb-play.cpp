@@ -6,8 +6,8 @@ using namespace std;
 class Superball {
   public:
     Superball(int argc, char **argv);
-    int r;
-    int c;
+    int row;
+    int column;
     int mss;
     int empty;
     vector <int> board;
@@ -30,7 +30,18 @@ int swap(int &a, int &b) {
   return 0;
 }
 
-
+void bestmove(Superball *s, DisjointSetByRankWPC &ds){
+  cout << "This function doesn't do anything yet.\n";
+  for (int i = 0; i < s->row; i++)
+  {
+    for (int j = 0; j < s->column; j++)
+    {
+      int currentindex = i * s->column + j;
+      if (s->board[currentindex] == '.' || s->board[currentindex] == '*')
+        continue;
+    }
+  }
+}
 int main() {
 
   cout << "This program doesn't do anything yet.\n";
