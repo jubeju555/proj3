@@ -26,8 +26,6 @@ private:
   int rows, cols;
 };
 
-
-
 void usage(const char *s)
 {
   fprintf(stderr, "usage: sb-analyze rows cols min-score-size colors\n");
@@ -117,7 +115,8 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
     for (int j = 0; j < s->column; j++)
     {
       int currentindex = i * s->column + j;
-      if (s->board[currentindex] == '.' || s->board[currentindex] == '*') continue;
+      if (s->board[currentindex] == '.' || s->board[currentindex] == '*')
+        continue;
 
       // this checks the column to the right
       if (j + 1 < s->column && s->board[currentindex] == s->board[currentindex + 1])
@@ -137,14 +136,13 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
     for (int j = 0; j < s->column; j++)
     {
       int currentindex = i * s->column + j;
-      if (s->board[currentindex] == '.' || s->board[currentindex] == '*') continue;
       int root = ds.Find(currentindex);
-      
+      if (s->board[currentindex] == '.' || s->board[currentindex] == '*')
+        continue;
+
       if (scoringset.find(root) == scoringset.end())
-      {
-        scoringset[root] = {1, s->goals[currentindex] != 0,s->goals[currentindex] ? currentindex: -1};
-        // if (s->goals[currentindex]) scoringcell[root] = currentindex;
-      }
+        scoringset[root] = {1, s->goals[currentindex] != 0, s->goals[currentindex] ? currentindex : -1};
+      // if (s->goals[currentindex]) scoringcell[root] = currentindex;
       else
       {
         // need to store where the stuff is in scoring cell into scorecell
@@ -153,12 +151,15 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
         scoringset[root].has_goal |= (s->goals[currentindex] != 0);
         // scoringset[root].scorecell = currentindex;
         if (s->goals[currentindex]) {
-          // Pick the top-left most goal cell
-          if (scoringset[root].scorecell == -1 || currentindex < scoringset[root].scorecell) {
-              scoringset[root].scorecell = currentindex;
-          }
+          // printf("Goal Cell Candidate: (%d,%d) for char %c\n", i, j, s->board[currentindex]);
+
+          if (s->goals[currentindex]) {
+            // Always update to the current goal cell, not the smallest or earliest
+            scoringset[root].scorecell = currentindex;
+        }
       }
-          }
+      
+      }
     }
   }
 }
@@ -174,7 +175,7 @@ void print(Superball *s, unordered_map<int, Metadata> &scoringset)
     if (data.size >= s->mss && data.has_goal && data.size > 1 && data.scorecell != -1)
     {
       int Grow = data.scorecell / s->column;
-      int Gcol = data.scorecell % s->column ;
+      int Gcol = data.scorecell % s->column;
       char scolor = s->board[data.scorecell];
       printf("  Size: %2d  Char: %c  Scoring Cell: %d,%d\n", data.size, scolor, Grow, Gcol);
     }
