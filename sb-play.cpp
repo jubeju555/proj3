@@ -78,14 +78,15 @@ void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadat
     }
     return;
   }
-   for (int i = 0; i < s->row; i++) {
-        for (int j = 0; j < s->column - 1; j++) {
-            swap(s->board[i * s->column + j], s->board[i * s->column + j + 1]);
-            cout << "Swap: " << i << "," << j << " with " << i << "," << j + 1 << endl;
-            return;
-        }
+  for (int i = 0; i < s->row; i++)
+  {
+    for (int j = 0; j < s->column - 1; j++)
+    {
+      swap(s->board[i * s->column + j], s->board[i * s->column + j + 1]);
+      cout << "Swap: " << i << "," << j << " with " << i << "," << j + 1 << endl;
+      return;
     }
-
+  }
 }
 
 int main(int argc, char **argv)
@@ -96,7 +97,7 @@ int main(int argc, char **argv)
   unordered_map<int, Metadata> scoringset;
   unordered_map<int, int> scoringcell;
   cout << "This program doesn't do anything yet.\n";
-  sbanalyze(s,ds,scoringset,scoringcell);
+  sbanalyze(s, ds, scoringset, scoringcell);
   bestmove(s, ds, scoringset);
 
   return 0;
