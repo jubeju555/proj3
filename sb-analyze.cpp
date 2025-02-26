@@ -118,6 +118,10 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
       if (s->board[currentindex] == '.' || s->board[currentindex] == '*')
         continue;
 
+
+
+
+        
       // this checks the column to the right
       if (j + 1 < s->column && s->board[currentindex] == s->board[currentindex + 1])
       {
@@ -137,9 +141,8 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
     {
       int currentindex = i * s->column + j;
       int root = ds.Find(currentindex);
-      if (s->board[currentindex] == '.' || s->board[currentindex] == '*')
-        continue;
-
+      if (s->board[currentindex] == '.' || s->board[currentindex] == '*') continue;
+      // if the root is not in the scoring set, add it
       if (scoringset.find(root) == scoringset.end())
         scoringset[root] = {1, s->goals[currentindex] != 0, s->goals[currentindex] ? currentindex : -1};
       // if (s->goals[currentindex]) scoringcell[root] = currentindex;

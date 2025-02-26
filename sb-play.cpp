@@ -20,7 +20,13 @@ public:
   vector<int> goals;
   vector<int> colors;
 };
+void usage(const char *s)
+{
+  fprintf(stderr, "usage: sb-read rows cols min-score-size colors\n");
+  if (s != NULL) fprintf(stderr, "%s\n", s);
 
+  exit(1);
+}
 Superball::Superball(int argc, char **argv)
 {
   int i, j;
@@ -93,13 +99,7 @@ struct Metadata
   bool has_goal;
   int scorecell;
 };
-void usage(const char *s)
-{
-  fprintf(stderr, "usage: sb-read rows cols min-score-size colors\n");
-  if (s != NULL) fprintf(stderr, "%s\n", s);
 
-  exit(1);
-}
 
 int swap(int &a, int &b)
 {
