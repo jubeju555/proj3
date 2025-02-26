@@ -111,7 +111,6 @@ struct Metadata
 void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadata> &scoringset, unordered_map<int, int> &scoringcell)
 {
 
-  
   for (int i = 0; i < s->row; i++)
   {
     for (int j = 0; j < s->column; j++)
@@ -142,7 +141,6 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
       // if the root is not in the scoring set, add it
       if (scoringset.find(root) == scoringset.end())
         scoringset[root] = {1, s->goals[currentindex] != 0, s->goals[currentindex] ? currentindex : -1};
-        
       // if (s->goals[currentindex]) scoringcell[root] = currentindex;
       else
       {
@@ -162,9 +160,6 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
       }
     }
   }
-
-
-
 }
 
 void print(Superball *s, unordered_map<int, Metadata> &scoringset)
