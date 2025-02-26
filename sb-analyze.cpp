@@ -116,11 +116,13 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
     for (int j = 0; j < s->column; j++)
     {
       int currentindex = i * s->column + j;
-      int root = ds.Find(currentindex);
-
       if (s->board[currentindex] == '.' || s->board[currentindex] == '*') continue;
-      if (scoringset.find(root) == scoringset.end())
-        scoringset[root] = {0, s->goals[currentindex] != 0, s->goals[currentindex] ? currentindex : -1};
+
+      int root = ds.Find(currentindex);
+      if (scoringset.find(root) == scoringset.end()) {
+          scoringset[root] = {1, s->goals[currentindex] != 0, s->goals[currentindex] ? currentindex : -1};
+      }
+        
       // this checks the column to the right
       if (j + 1 < s->column && s->board[currentindex] == s->board[currentindex + 1])
       {
@@ -135,49 +137,38 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
   }
 
   for (int i = 0; i < s->row; i++)
-  {
-    for (int j = 0; j < s->column; j++)
     {
-      int currentindex = i * s->column + j;
-      int root = ds.Find(currentindex);
-      if (s->board[currentindex] == '.' || s->board[currentindex] == '*') continue;
-      // if the root is not in the scoring set, add it
-      
-      // if (s->goals[currentindex]) scoringcell[root] = currentindex;
-      else
-      {
-        // need to store where the stuff is in scoring cell into scorecell
-        // its storing them all in the same place, which is why its grabbing random values for scoring cell
-        scoringset[root].size++;
-        scoringset[root].has_goal |= (s->goals[currentindex] != 0);
-        // scoringset[root].scorecell = currentindex;
-        if (s->goals[currentindex]) {
-          // printf("Goal Cell Candidate: (%d,%d) for char %c\n", i, j, s->board[currentindex]);
-
-          if (scoringset[root].scorecell == -1 || currentindex < scoringset[root].scorecell) {
-            // update to the current goal cell, not the smallest or earliest
-            scoringset[root].scorecell = currentindex;
+        for (int j = 0; j < s->column; j++)
+        {
+            int currentindex = i * s->column + j;
+            if (s->board[currentindex] == '.' || s->board[currentindex] == '*') continue;
+            
+            int root = ds.Find(currentindex);
+            if (scoringset.find(root) != scoringset.end()) {
+              scoringset[root].size++;
+              scoringset[root].has_goal |= (s->goals[currentindex] != 0);
+              if (s->goals[currentindex] && (scoringset[root].scorecell == -1 || currentindex < scoringset[root].scorecell)) {
+                  scoringset[root].scorecell = currentindex;
+              }
+          }
         }
-      }
-      }
-    }
   }
 }
-
 void print(Superball *s, unordered_map<int, Metadata> &scoringset)
 {
   printf("Scoring sets: \n");
   for (unordered_map<int, Metadata>::iterator it = scoringset.begin(); it != scoringset.end(); it++)
   {
     // double check what these 2 lines are doing
-    // int root = it->first;
+    int root = it->first;
     Metadata data = it->second;
-    if (data.size >= s->mss && data.has_goal && data.size > 1 && data.scorecell != -1)
+    if (data.size > s->mss && data.has_goal && data.size > 1 && data.scorecell != -1)
     {
       int Grow = data.scorecell / s->column ;
       int Gcol = data.scorecell % s->column ;
       char scolor = s->board[data.scorecell];
-      printf("  Size: %2d  Char: %c  Scoring Cell: %d,%d\n", data.size, scolor, Grow, Gcol);
+      if (data.size > 1) printf("  Size: %2d  Char: %c  Scoring Cell: %d,%d\n", data.size - 1, scolor, Grow, Gcol); 
+      else printf("  Size: %2d  Char: %c  Scoring Cell: %d,%d\n", data.size, scolor, Grow, Gcol);
     }
   }
 }
