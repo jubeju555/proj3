@@ -154,7 +154,7 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
           // printf("Goal Cell Candidate: (%d,%d) for char %c\n", i, j, s->board[currentindex]);
 
           if (s->goals[currentindex]) {
-            // Always update to the current goal cell, not the smallest or earliest
+            // update to the current goal cell, not the smallest or earliest
             scoringset[root].scorecell = currentindex;
         }
       }
@@ -174,8 +174,8 @@ void print(Superball *s, unordered_map<int, Metadata> &scoringset)
     Metadata data = it->second;
     if (data.size >= s->mss && data.has_goal && data.size > 1 && data.scorecell != -1)
     {
-      int Grow = data.scorecell / s->column;
-      int Gcol = data.scorecell % s->column;
+      int Grow = data.scorecell / s->column ;
+      int Gcol = data.scorecell % s->column ;
       char scolor = s->board[data.scorecell];
       printf("  Size: %2d  Char: %c  Scoring Cell: %d,%d\n", data.size, scolor, Grow, Gcol);
     }

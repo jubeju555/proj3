@@ -4,6 +4,7 @@
 #include <map>
 #include <unordered_map>
 #include <algorithm>
+#include <cstring>
 
 using namespace std;
 
@@ -19,19 +20,86 @@ public:
   vector<int> goals;
   vector<int> colors;
 };
+
+Superball::Superball(int argc, char **argv)
+{
+  int i, j;
+  string s;
+
+  if (argc != 5)
+    usage(NULL);
+
+  if (sscanf(argv[1], "%d", &row) == 0 || row <= 0)
+    usage("Bad rows");
+  if (sscanf(argv[2], "%d", &column) == 0 || column <= 0)
+    usage("Bad cols");
+  if (sscanf(argv[3], "%d", &mss) == 0 || mss <= 0)
+    usage("Bad min-score-size");
+
+  colors.resize(256, 0);
+
+  for (i = 0; i < (int)strlen(argv[4]); i++)
+  {
+    if (!isalpha(argv[4][i]))
+      usage("Colors must be distinct letters");
+    if (!islower(argv[4][i]))
+      usage("Colors must be lowercase letters");
+    if (colors[argv[4][i]] != 0)
+      usage("Duplicate color");
+    colors[argv[4][i]] = 2 + i;
+    colors[toupper(argv[4][i])] = 2 + i;
+  }
+
+  board.resize(row * column);
+  goals.resize(row * column, 0);
+
+  empty = 0;
+
+  for (i = 0; i < row; i++)
+  {
+    if (!(cin >> s))
+    {
+      fprintf(stderr, "Bad board: not enough rows on standard input\n");
+      exit(1);
+    }
+    if ((int)s.size() != column)
+    {
+      fprintf(stderr, "Bad board on row %d - wrong number of characters.\n", i);
+      exit(1);
+    }
+    for (j = 0; j < column; j++)
+    {
+      if (s[j] != '*' && s[j] != '.' && colors[s[j]] == 0)
+      {
+        fprintf(stderr, "Bad board row %d - bad character %c.\n", i, s[j]);
+        exit(1);
+      }
+      board[i * column + j] = s[j];
+      if (board[i * column + j] == '.')
+        empty++;
+      if (board[i * column + j] == '*')
+        empty++;
+      if (isupper(board[i * column + j]) || board[i * column + j] == '*')
+      {
+        goals[i * column + j] = 1;
+        board[i * column + j] = tolower(board[i * column + j]);
+      }
+    }
+  }
+}
 struct Metadata
 {
   int size;
   bool has_goal;
   int scorecell;
 };
-// void usage(const char *s)
-// {
-//   fprintf(stderr, "usage: sb-read rows cols min-score-size colors\n");
-//   if (s != NULL) fprintf(stderr, "%s\n", s);
+void usage(const char *s)
+{
+  fprintf(stderr, "usage: sb-read rows cols min-score-size colors\n");
+  if (s != NULL) fprintf(stderr, "%s\n", s);
 
-//   exit(1);
-// }
+  exit(1);
+}
 
 int swap(int &a, int &b)
 {
@@ -88,7 +156,6 @@ void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadat
     }
   }
 }
-
 int main(int argc, char **argv)
 {
   Superball *s;
