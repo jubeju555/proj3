@@ -186,7 +186,7 @@ int main(int argc, char **argv)
   DisjointSetByRankWPC ds(s->row * s->column);
   unordered_map<int, Metadata> scoringset;
   unordered_map<int, int> scoringcell;
-
+  
   sbanalyze(s, ds, scoringset, scoringcell);
   print(s, scoringset);
 

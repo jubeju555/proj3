@@ -5,9 +5,10 @@
 #include <unordered_map>
 #include <algorithm>
 #include <cstring>
-
 using namespace std;
-
+// TO RUN:  sh run_multiple.sh 8 10 5 pbyrg bin/sb-play 10 1
+// TO RUN SINGLE TIME: time bin/sb-play 8 10 5 pbyrg <input-1.txt
+// TESTING: /home/jplank/cs302/Labs/Lab5/bin/sb-player 8 10 5 pbyrg bin/sb-play y y -
 class Superball
 {
 public:
@@ -101,12 +102,11 @@ struct Metadata
   int scorecell;
 };
 
-int swap(int &a, int &b)
+void swap(int &a, int &b)
 {
   int temp = a;
   a = b;
   b = temp;
-  return 0;
 }
 void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadata> &scoringset, unordered_map<int, int> &scoringcell)
 {
@@ -178,6 +178,7 @@ void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadat
 
   unordered_map<int, Metadata> tempScoringSet;
   unordered_map<int, int> tempScoringCell;
+  
   //  score first policy 
   for (unordered_map<int, Metadata>::iterator it = scoringset.begin(); it != scoringset.end(); it++)
   {
@@ -200,11 +201,10 @@ void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadat
   {
     for (int j = 0; j < s->column; j++)
     {
-      if (s->board[i * s->column + j] != '.' && s->board[i * s->column + j] != '*')
+      if (s->board[i * s->column + j] != '.' && s->board[i * s->column + j] != '*' && s->board[i * s->column + j] != 0)
       {
         candidates.push_back(make_pair(i, j));
       }
-    }
   }
 
   // i want to swap and unswap and find the best potential swap score
@@ -255,21 +255,23 @@ void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadat
     cout << "SWAP " << bestSwapI << " " << bestSwapJ << " " << bestSwapX << " " << bestSwapY << endl;
   }
 }
-// TO RUN:  sh run_multiple.sh 8 10 5 pbyrg sb-play 10 1
-// TO RUN SINGLE TIME: time bin/sb-play 8 10 5 pbyrg <input-1.txt
-// TESTING: /home/jplank/cs302/Labs/Lab5/bin/sb-player 8 10 5 pbyrg bin/sb-play y y -
-
+}
 
 void printBoard(Superball *s)
 {
-    for (int i = 0; i < s->row; i++)
+  for (int i = 0; i < s->row; i++)
+  {
+    for (int j = 0; j < s->column; j++)
     {
-        for (int j = 0; j < s->column; j++)
-        {
-            cout << s->board[i * s->column + j] << " ";
-        }
-        cout << endl;
+      char cell = s->board[i * s->column + j];
+      if (s->goals[i * s->column + j])
+      {
+        cell = toupper(cell);
+      }
+      cout << cell << " ";
     }
+    cout << endl;
+  }
 }
 
 int main(int argc, char **argv)
@@ -280,11 +282,14 @@ int main(int argc, char **argv)
   unordered_map<int, Metadata> scoringset;
   unordered_map<int, int> scoringcell;
   // cout << "This program doesn't do anything yet.\n";
-for (int i = 0; i < 20; i++)
+for (int i = 0; i < 5; i++)
 {
+  
   sbanalyze(s, ds, scoringset, scoringcell);
   bestmove(s, ds, scoringset);
-  sbanalyze(s, ds, scoringset, scoringcell);
+  // printBoard(s);
+  // sbanalyze(s, ds, scoringset, scoringcell);
+  // cin.get();
 }
 
   
