@@ -23,7 +23,8 @@ public:
 void usage(const char *s)
 {
   fprintf(stderr, "usage: sb-read rows cols min-score-size colors\n");
-  if (s != NULL) fprintf(stderr, "%s\n", s);
+  if (s != NULL)
+    fprintf(stderr, "%s\n", s);
 
   exit(1);
 }
@@ -100,7 +101,6 @@ struct Metadata
   int scorecell;
 };
 
-
 int swap(int &a, int &b)
 {
   int temp = a;
@@ -110,6 +110,7 @@ int swap(int &a, int &b)
 }
 void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadata> &scoringset, unordered_map<int, int> &scoringcell)
 {
+
   for (int i = 0; i < s->row; i++)
   {
     for (int j = 0; j < s->column; j++)
@@ -118,44 +119,120 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
       if (s->board[currentindex] == '.' || s->board[currentindex] == '*')
         continue;
 
-      // this checks the column to the right
+      int root = ds.Find(currentindex);
+      // adds root if not in scoringset
+      if (scoringset.find(root) == scoringset.end())
+      {
+        scoringset[root] = {1, s->goals[currentindex] != 0, s->goals[currentindex] ? currentindex : -1};
+      }
+
+      // checks the column to the right
       if (j + 1 < s->column && s->board[currentindex] == s->board[currentindex + 1])
       {
         ds.Union(ds.Find(currentindex), ds.Find(currentindex + 1));
       }
-      // this checks the row below
+      // checks the row below
       if (i + 1 < s->row && s->board[currentindex] == s->board[currentindex + s->column])
       {
         ds.Union(ds.Find(currentindex), ds.Find(currentindex + s->column));
       }
     }
   }
+
+  for (int i = 0; i < s->row; i++)
+  {
+    for (int j = 0; j < s->column; j++)
+    {
+      int currentindex = i * s->column + j;
+      // Skip empty cells
+      if (s->board[currentindex] == '.' || s->board[currentindex] == '*')
+        continue;
+
+      int root = ds.Find(currentindex);
+
+      // If the root is already in the scoring set, update its metadata
+      if (scoringset.find(root) != scoringset.end())
+      {
+        scoringset[root].size++;
+        scoringset[root].has_goal |= (s->goals[currentindex] != 0);
+        // update if cell is scoring cell and pick earlist scoring cell
+        if (s->goals[currentindex] && (scoringset[root].scorecell == -1 || currentindex < scoringset[root].scorecell))
+        {
+          scoringset[root].scorecell = currentindex;
+        }
+      }
+    }
+  }
 }
 void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadata> &scoringset)
 {
+  int bestswapI = -1;
+  int bestswapJ = -1;
+  int bestscore = 0;
 
-  for (unordered_map<int, Metadata>::iterator it = scoringset.begin(); it != scoringset.end(); it++)
+  if (s->empty < 5)
   {
-    Metadata data = it->second;
 
-    if (data.size >= s->mss && data.has_goal && data.size > 1 && data.scorecell != -1)
+    for (int i = 0; i < s->row; i++)
     {
-      int Grow = data.scorecell / s->column;
-      int Gcol = data.scorecell % s->column;
-      printf("Score at %d, %d\n", Grow, Gcol);
+      for (int j = 0; j < s->column; j++)
+      {
+        if (s->board[i * s->column + j] == '.' || s->board[i * s->column + j] == '*')
+          continue;
+        swap(s->board[i * s->column + j], s->board[i * s->column + j + 1]);
+        int scoresize = ds.Find(i * s->column + j);
+        if (scoresize > bestscore)
+        {
+          bestscore = scoresize;
+          bestswapI = i;
+          bestswapJ = j;
+        }
+        swap(s->board[i * s->column + j], s->board[i * s->column + j + 1]);
+      }
     }
-    return;
   }
-  for (int i = 0; i < s->row; i++)
+  if (bestswapI != -1 && bestswapJ != -1)
   {
-    for (int j = 0; j < s->column - 1; j++)
+    cout << "Swap: " << bestswapI << "," << bestswapJ << " with " << bestswapI << "," << bestswapJ + 1 << endl;
+  }
+  else
+  {
+    int secondbestsize = 0;
+    int secondbestrow = -1;
+    int secondbestcol = -1;
+
+    for (unordered_map<int, Metadata>::iterator it = scoringset.begin(); it != scoringset.end(); it++)
     {
-      swap(s->board[i * s->column + j], s->board[i * s->column + j + 1]);
-      cout << "Swap: " << i << "," << j << " with " << i << "," << j + 1 << endl;
-      return;
+      Metadata data = it->second;
+
+      if (data.size >= s->mss && data.has_goal && data.size > 1 && data.scorecell != -1)
+      {
+        secondbestsize = data.size;
+        int Grow = data.scorecell / s->column;
+        int Gcol = data.scorecell % s->column;
+      }
     }
   }
+  if (bestscore > 0)
+  {
+   printf("Score at %d, %d\n", bestswapI, bestswapJ);
+  }
+  
 }
+
+//   return;
+// }
+
+// for (int i = 0; i < s->row; i++)
+// {
+//   for (int j = 0; j < s->column - 1; j++)
+//   {
+//     swap(s->board[i * s->column + j], s->board[i * s->column + j + 1]);
+//     cout << "Swap: " << i << "," << j << " with " << i << "," << j + 1 << endl;
+//     return;
+//   }
+// }
+
 int main(int argc, char **argv)
 {
   Superball *s;
@@ -163,7 +240,7 @@ int main(int argc, char **argv)
   DisjointSetByRankWPC ds(s->row * s->column);
   unordered_map<int, Metadata> scoringset;
   unordered_map<int, int> scoringcell;
-  cout << "This program doesn't do anything yet.\n";
+  // cout << "This program doesn't do anything yet.\n";
   sbanalyze(s, ds, scoringset, scoringcell);
   bestmove(s, ds, scoringset);
 

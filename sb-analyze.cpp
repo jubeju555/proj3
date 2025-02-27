@@ -119,16 +119,17 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
       if (s->board[currentindex] == '.' || s->board[currentindex] == '*') continue;
 
       int root = ds.Find(currentindex);
+      // adds root if not in scoringset
       if (scoringset.find(root) == scoringset.end()) {
           scoringset[root] = {1, s->goals[currentindex] != 0, s->goals[currentindex] ? currentindex : -1};
       }
         
-      // this checks the column to the right
+      // checks the column to the right
       if (j + 1 < s->column && s->board[currentindex] == s->board[currentindex + 1])
       {
         ds.Union(ds.Find(currentindex), ds.Find(currentindex + 1));
       }
-      // this checks the row below
+      // checks the row below
       if (i + 1 < s->row && s->board[currentindex] == s->board[currentindex + s->column])
       {
         ds.Union(ds.Find(currentindex), ds.Find(currentindex + s->column));
@@ -141,14 +142,18 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
         for (int j = 0; j < s->column; j++)
         {
             int currentindex = i * s->column + j;
+            // Skip empty cells
             if (s->board[currentindex] == '.' || s->board[currentindex] == '*') continue;
             
             int root = ds.Find(currentindex);
+            
+            // If the root is already in the scoring set, update its metadata
             if (scoringset.find(root) != scoringset.end()) {
               scoringset[root].size++;
               scoringset[root].has_goal |= (s->goals[currentindex] != 0);
+              // update if cell is scoring cell and pick earlist scoring cell
               if (s->goals[currentindex] && (scoringset[root].scorecell == -1 || currentindex < scoringset[root].scorecell)) {
-                  scoringset[root].scorecell = currentindex;
+            scoringset[root].scorecell = currentindex;
               }
           }
         }
@@ -162,6 +167,7 @@ void print(Superball *s, unordered_map<int, Metadata> &scoringset)
     // double check what these 2 lines are doing
     int root = it->first;
     Metadata data = it->second;
+    // quick calculation of row and column, as well as size and color
     if (data.size > s->mss && data.has_goal && data.size > 1 && data.scorecell != -1)
     {
       int Grow = data.scorecell / s->column ;
@@ -183,7 +189,6 @@ int main(int argc, char **argv)
 
   sbanalyze(s, ds, scoringset, scoringcell);
   print(s, scoringset);
-  // ds.print();
 
   delete s;
   return 0;
