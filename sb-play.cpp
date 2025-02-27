@@ -180,17 +180,7 @@ void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadat
   unordered_map<int, int> tempScoringCell;
   
   //  score first policy 
-  for (unordered_map<int, Metadata>::iterator it = scoringset.begin(); it != scoringset.end(); it++)
-  {
-    Metadata data = it->second;
-    if (data.size >= s->mss && data.has_goal && data.scorecell != -1)
-    {
-      int scoreRow = data.scorecell / s->column;
-      int scoreCol = data.scorecell % s->column;
-      cout << "SCORE " << scoreRow << " " << scoreCol << endl;
-      return;
-    }
-  }
+  
 
   // No immediate score — try to set up a future score
   int maxpotentialscore = 0;
@@ -221,7 +211,6 @@ void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadat
 
       // Swap then analyze
       swap(s->board[i1 * s->column + j1], s->board[i2 * s->column + j2]);
-      
       sbanalyze(s, ds, tempScoringSet, tempScoringCell);
 
       // Find the best potential score after the swap
@@ -249,12 +238,28 @@ void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadat
       swap(s->board[i1 * s->column + j1], s->board[i2 * s->column + j2]);
     }
   }
-
-  // Output the best swap
-  if (maxpotentialscore > 0)
+for (unordered_map<int, Metadata>::iterator it = scoringset.begin(); it != scoringset.end(); it++)
   {
-    cout << "SWAP " << bestSwapI << " " << bestSwapJ << " " << bestSwapX << " " << bestSwapY << endl;
+    Metadata data = it->second;
+    if (data.size >= s->mss && data.has_goal && data.scorecell != -1)
+    {
+      int scoreRow = data.scorecell / s->column;
+      int scoreCol = data.scorecell % s->column;
+      if (data.size > 1) data.size - 1;
+      
+      cout << "SCORE " << scoreRow << " " << scoreCol << endl;
+      return;
+    }
+    else{
+      cout << "SWAP " << bestSwapI << " " << bestSwapJ << " " << bestSwapX << " " << bestSwapY << endl;
+
+    }
   }
+  // Output the best swap
+  // if (maxpotentialscore > 0)
+  // {
+  //   cout << "SWAP " << bestSwapI << " " << bestSwapJ << " " << bestSwapX << " " << bestSwapY << endl;
+  // }
 }
 
 void printBoard(Superball *s)
