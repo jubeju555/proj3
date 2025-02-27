@@ -101,13 +101,13 @@ struct Metadata
   bool has_goal;
   int scorecell;
 };
-
 void swap(int &a, int &b)
 {
   int temp = a;
   a = b;
   b = temp;
 }
+
 void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadata> &scoringset, unordered_map<int, int> &scoringcell)
 {
   scoringset.clear();
@@ -205,6 +205,7 @@ void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadat
       {
         candidates.push_back(make_pair(i, j));
       }
+    }
   }
 
   // i want to swap and unswap and find the best potential swap score
@@ -255,7 +256,6 @@ void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadat
     cout << "SWAP " << bestSwapI << " " << bestSwapJ << " " << bestSwapX << " " << bestSwapY << endl;
   }
 }
-}
 
 void printBoard(Superball *s)
 {
@@ -282,16 +282,14 @@ int main(int argc, char **argv)
   unordered_map<int, Metadata> scoringset;
   unordered_map<int, int> scoringcell;
   // cout << "This program doesn't do anything yet.\n";
-for (int i = 0; i < 5; i++)
-{
-  
-  sbanalyze(s, ds, scoringset, scoringcell);
-  bestmove(s, ds, scoringset);
-  // printBoard(s);
-  // sbanalyze(s, ds, scoringset, scoringcell);
-  // cin.get();
-}
+  for (int i = 0; i < 5; i++)
+  {
+    sbanalyze(s, ds, scoringset, scoringcell);
+    bestmove(s, ds, scoringset);
+    // printBoard(s);
+    // sbanalyze(s, ds, scoringset, scoringcell);
+    // cin.get();
+  }
 
-  
   return 0;
 }
