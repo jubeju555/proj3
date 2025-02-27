@@ -9,7 +9,7 @@ seed=$7
 i=1
 t=0
 while [ $i -le $6 ]; do
-  j=`bin/sb-player $1 $2 $3 $4 $5 n n $seed | awk '{ print $NF }'`
+  j=`/home/jplank/cs302/Labs/Lab5/bin/sb-player $1 $2 $3 $4 $5 n n $seed | awk '{ print $NF }'`
   if [ a"$j" = a ]; then
     j=0
   fi

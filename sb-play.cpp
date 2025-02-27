@@ -110,6 +110,8 @@ int swap(int &a, int &b)
 }
 void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadata> &scoringset, unordered_map<int, int> &scoringcell)
 {
+  scoringset.clear();
+  scoringcell.clear();
 
   for (int i = 0; i < s->row; i++)
   {
@@ -164,107 +166,111 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
     }
   }
 }
+
 void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadata> &scoringset)
 {
   // first set
-    int bestSwapI = -1, bestSwapJ = -1;
-    // second set
-    int bestSwapX = -1, bestSwapY = -1;
-    // prem score
-    int bestScore = 0;
+  int bestSwapI = -1, bestSwapJ = -1;
+  // second set
+  int bestSwapX = -1, bestSwapY = -1;
+  // prem score
+  int bestScore = 0;
 
-    //  score first policy 
-    for (unordered_map<int, Metadata>::iterator it = scoringset.begin(); it != scoringset.end(); it++)
+  unordered_map<int, Metadata> tempScoringSet;
+  unordered_map<int, int> tempScoringCell;
+  //  score first policy 
+  for (unordered_map<int, Metadata>::iterator it = scoringset.begin(); it != scoringset.end(); it++)
+  {
+    Metadata data = it->second;
+    if (data.size >= s->mss && data.has_goal && data.scorecell != -1)
     {
-        Metadata data = it->second;
-        if (data.size >= s->mss && data.has_goal && data.scorecell != -1)
-        {
-            int scoreRow = data.scorecell / s->column;
-            int scoreCol = data.scorecell % s->column;
-            cout << "SCORE " << scoreRow << " " << scoreCol << endl;
-            return;
-        }
-        
+      int scoreRow = data.scorecell / s->column;
+      int scoreCol = data.scorecell % s->column;
+      cout << "SCORE " << scoreRow << " " << scoreCol << endl;
+      return;
     }
+  }
 
-    // No immediate score — try to set up a future score
-    int maxPotentialScore = 0;
-    vector<pair<int, int>> candidates;
+  // No immediate score — try to set up a future score
+  int maxpotentialscore = 0;
+  vector<pair<int, int>> candidates;
 
-    // read through for possible swaps
+  // read through for possible swaps
+  for (int i = 0; i < s->row; i++)
+  {
+    for (int j = 0; j < s->column; j++)
+    {
+      if (s->board[i * s->column + j] != '.' && s->board[i * s->column + j] != '*')
+      {
+        candidates.push_back(make_pair(i, j));
+      }
+    }
+  }
+
+  // i want to swap and unswap and find the best potential swap score
+  for (size_t pair1 = 0; pair1 < candidates.size(); pair1++)
+  {
+    for (size_t pair2 = pair1 + 1; pair2 < candidates.size(); pair2++)
+    {
+      int i1 = candidates[pair1].first;
+      int j1 = candidates[pair1].second;
+
+      int i2 = candidates[pair2].first;
+      int j2 = candidates[pair2].second;
+
+      // Swap then analyze
+      swap(s->board[i1 * s->column + j1], s->board[i2 * s->column + j2]);
+      
+      sbanalyze(s, ds, tempScoringSet, tempScoringCell);
+
+      // Find the best potential score after the swap
+      int potentialscore = 0;
+      for (unordered_map<int, Metadata>::iterator it = tempScoringSet.begin(); it != tempScoringSet.end(); it++)
+      {
+        Metadata data = it->second;
+        if (data.size >= s->mss && data.has_goal)
+        {
+          potentialscore += data.size;
+        }
+      }
+
+      // find best move on current board
+      if (potentialscore > maxpotentialscore)
+      {
+        maxpotentialscore = potentialscore;
+        bestSwapI = i1;
+        bestSwapJ = j1;
+        bestSwapX = i2;
+        bestSwapY = j2;
+      }
+
+      // Undo the swap
+      swap(s->board[i1 * s->column + j1], s->board[i2 * s->column + j2]);
+    }
+  }
+
+  // Output the best swap
+  if (maxpotentialscore > 0)
+  {
+    cout << "SWAP " << bestSwapI << " " << bestSwapJ << " " << bestSwapX << " " << bestSwapY << endl;
+  }
+}
+// TO RUN:  sh run_multiple.sh 8 10 5 pbyrg sb-play 10 1
+// TO RUN SINGLE TIME: time bin/sb-play 8 10 5 pbyrg <input-1.txt
+// TESTING: /home/jplank/cs302/Labs/Lab5/bin/sb-player 8 10 5 pbyrg bin/sb-play y y -
+
+
+void printBoard(Superball *s)
+{
     for (int i = 0; i < s->row; i++)
     {
         for (int j = 0; j < s->column; j++)
         {
-            if (s->board[i * s->column + j] != '.' && s->board[i * s->column + j] != '*')
-            {
-                candidates.push_back(make_pair(i, j));
-            }
+            cout << s->board[i * s->column + j] << " ";
         }
-    }
-
-    // i want to swap and unswap and find the best potential swap score
-    for (size_t pair1 = 0; pair1 < candidates.size(); pair1++)
-    {
-        for (size_t pair2 = pair1 + 1; pair2 < candidates.size(); pair2++)
-        {
-            int i1 = candidates[pair1].first;
-            int j1 = candidates[pair1].second;
-            int i2 = candidates[pair2].first;
-            int j2 = candidates[pair2].second;
-
-            // Swap then analyze
-            swap(s->board[i1 * s->column + j1], s->board[i2 * s->column + j2]);
-            unordered_map<int, int> tempScoringCell;
-            sbanalyze(s, ds, scoringset, tempScoringCell);
-
-            // Find the best potential score after the swap
-            int potentialScore = 0;
-            for (unordered_map<int, Metadata>::iterator it = scoringset.begin(); it != scoringset.end(); it++)
-            {
-                Metadata data = it->second;
-                if (data.size >= s->mss && data.has_goal)
-                {
-                    potentialScore += data.size;
-                }
-            }
-
-            // post best move on current board
-            if (potentialScore > maxPotentialScore)
-            {
-                maxPotentialScore = potentialScore;
-                bestSwapI = i1;
-                bestSwapJ = j1;
-                bestSwapX = i2;
-                bestSwapY = j2;
-            }
-
-            // Undo the swap
-            swap(s->board[i1 * s->column + j1], s->board[i2 * s->column + j2]);
-        }
-    }
-
-    // Output the best swap
-    if (bestScore > 0)
-    {
-      cout << "SWAP " << bestSwapI << " " << bestSwapJ << " " << bestSwapX << " " << bestSwapY << endl;
-
+        cout << endl;
     }
 }
-// TO RUN:  sh run_multiple.sh 8 10 5 pbyrg sb-play3 10 1
-
-//   return;
-// }
-
-// for (int i = 0; i < s->row; i++)
-// {
-//   for (int j = 0; j < s->column - 1; j++)
-//   {
-//     swap(s->board[i * s->column + j], s->board[i * s->column + j + 1]);
-//     cout << "Swap: " << i << "," << j << " with " << i << "," << j + 1 << endl;
-//     return;
-//   }
-// }
 
 int main(int argc, char **argv)
 {
@@ -274,7 +280,13 @@ int main(int argc, char **argv)
   unordered_map<int, Metadata> scoringset;
   unordered_map<int, int> scoringcell;
   // cout << "This program doesn't do anything yet.\n";
+for (int i = 0; i < 20; i++)
+{
   sbanalyze(s, ds, scoringset, scoringcell);
   bestmove(s, ds, scoringset);
+  sbanalyze(s, ds, scoringset, scoringcell);
+}
+
+  
   return 0;
 }
