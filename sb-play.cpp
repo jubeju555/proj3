@@ -6,6 +6,9 @@
 #include <algorithm>
 #include <cstring>
 using namespace std;
+// TO RUN:  sh run_multiple.sh 8 10 5 pbyrg bin/sb-play 100 -
+// TO RUN SINGLE TIME: time bin/sb-play 8 10 5 pbyrg <input-1.txt
+// TESTING: /home/jplank/cs302/Labs/Lab5/bin/sb-player 8 10 5 pbyrg bin/sb-play y y -
 
 class Superball
 {
@@ -253,8 +256,9 @@ void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadat
   }
 
   // If we found a valid scoring move, take it
-  if (bestscorecell > 0)
+  if (bestscorecell > 0 || bestscore >= s->mss)
   {
+    if(bestscore > 1) bestscore - 1;
     int scoreRow = bestscorecell / s->column;
     int scoreCol = bestscorecell % s->column;
     cout << "SCORE " << scoreRow << " " << scoreCol << endl;
@@ -348,29 +352,29 @@ void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadat
   else
   {
     // If we're here, we couldn't find a good swap - do a fallback swap
-    if (cells.size() >= 2)
-    {
-      // Just swap any two different color pieces
-      for (size_t c1 = 0; c1 < cells.size(); c1++)
-      {
-        for (size_t c2 = c1 + 1; c2 < cells.size(); c2++)
-        {
-          int i1 = cells[c1].first;
-          int j1 = cells[c1].second;
-          int idx1 = i1 * s->column + j1;
+    // if (cells.size() >= 2)
+    // {
+    //   // Just swap any two different color pieces
+    //   for (size_t c1 = 0; c1 < cells.size(); c1++)
+    //   {
+    //     for (size_t c2 = c1 + 1; c2 < cells.size(); c2++)
+    //     {
+    //       int i1 = cells[c1].first;
+    //       int j1 = cells[c1].second;
+    //       int idx1 = i1 * s->column + j1;
 
-          int i2 = cells[c2].first;
-          int j2 = cells[c2].second;
-          int idx2 = i2 * s->column + j2;
+    //       int i2 = cells[c2].first;
+    //       int j2 = cells[c2].second;
+    //       int idx2 = i2 * s->column + j2;
 
-          if (s->board[idx1] != s->board[idx2])
-          {
-            cout << "SWAP " << i1 << " " << j1 << " " << i2 << " " << j2 << endl;
-            return;
-          }
-        }
-      }
-    }
+    //       if (s->board[idx1] != s->board[idx2])
+    //       {
+    //         cout << "SWAP " << i1 << " " << j1 << " " << i2 << " " << j2 << endl;
+    //         return;
+    //       }
+      //   }
+      // }
+    // }
   }
 }
 
