@@ -110,26 +110,27 @@ struct Metadata
 
 void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadata> &scoringset, unordered_map<int, int> &scoringcell)
 {
+  scoringset.clear();
+  scoringcell.clear();
 
   for (int i = 0; i < s->row; i++)
   {
     for (int j = 0; j < s->column; j++)
     {
       int currentindex = i * s->column + j;
-      if (s->board[currentindex] == '.' || s->board[currentindex] == '*') continue;
+      if (s->board[currentindex] == '.' || s->board[currentindex] == '*')
+        continue;
 
       int root = ds.Find(currentindex);
-      // adds root if not in scoringset
-      if (scoringset.find(root) == scoringset.end()) {
-          scoringset[root] = {1, s->goals[currentindex] != 0, s->goals[currentindex] ? currentindex : -1};
+      if (scoringset.find(root) == scoringset.end())
+      {
+        scoringset[root] = {1, s->goals[currentindex] != 0, s->goals[currentindex] ? currentindex : -1};
       }
-        
-      // checks the column to the right
+
       if (j + 1 < s->column && s->board[currentindex] == s->board[currentindex + 1])
       {
         ds.Union(ds.Find(currentindex), ds.Find(currentindex + 1));
       }
-      // checks the row below
       if (i + 1 < s->row && s->board[currentindex] == s->board[currentindex + s->column])
       {
         ds.Union(ds.Find(currentindex), ds.Find(currentindex + s->column));
@@ -138,25 +139,25 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
   }
 
   for (int i = 0; i < s->row; i++)
+  {
+    for (int j = 0; j < s->column; j++)
     {
-        for (int j = 0; j < s->column; j++)
+      int currentindex = i * s->column + j;
+      if (s->board[currentindex] == '.' || s->board[currentindex] == '*')
+        continue;
+
+      int root = ds.Find(currentindex);
+
+      if (scoringset.find(root) != scoringset.end())
+      {
+        scoringset[root].size++;
+        scoringset[root].has_goal |= (s->goals[currentindex] != 0);
+        if (s->goals[currentindex] && (scoringset[root].scorecell == -1 || currentindex < scoringset[root].scorecell))
         {
-            int currentindex = i * s->column + j;
-            // Skip empty cells
-            if (s->board[currentindex] == '.' || s->board[currentindex] == '*') continue;
-            
-            int root = ds.Find(currentindex);
-            
-            // If the root is already in the scoring set, update its metadata
-            if (scoringset.find(root) != scoringset.end()) {
-              scoringset[root].size++;
-              scoringset[root].has_goal |= (s->goals[currentindex] != 0);
-              // update if cell is scoring cell and pick earlist scoring cell
-              if (s->goals[currentindex] && (scoringset[root].scorecell == -1 || currentindex < scoringset[root].scorecell)) {
-            scoringset[root].scorecell = currentindex;
-              }
-          }
+          scoringset[root].scorecell = currentindex;
         }
+      }
+    }
   }
 }
 void print(Superball *s, unordered_map<int, Metadata> &scoringset)
