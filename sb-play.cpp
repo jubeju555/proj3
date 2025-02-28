@@ -330,7 +330,7 @@ void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadat
         else if (it2->second.size >= s->mss / 2)
         {
           // Also give value to growing sets that might become scorable later
-          swapval += it2->second.size * 110;
+          swapval += it2->second.size * 10;
         }
       }
 
