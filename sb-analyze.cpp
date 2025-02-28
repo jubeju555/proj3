@@ -1,3 +1,8 @@
+/*
+judah benjamin
+superball part 1
+this program reads in a board, lookes at possible swaps and sets, sotres the meta data and reports it. */
+
 #include <cstdio>
 #include <cstring>
 #include <iostream>
@@ -107,7 +112,7 @@ struct Metadata
   bool has_goal;
   int scorecell;
 };
-
+// reads and stores the metadata of the board
 void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadata> &scoringset, unordered_map<int, int> &scoringcell)
 {
   scoringset.clear();
@@ -122,15 +127,17 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
         continue;
 
       int root = ds.Find(currentindex);
+      // index at one
       if (scoringset.find(root) == scoringset.end())
       {
         scoringset[root] = {1, s->goals[currentindex] != 0, s->goals[currentindex] ? currentindex : -1};
       }
-
+      // check right 
       if (j + 1 < s->column && s->board[currentindex] == s->board[currentindex + 1])
       {
         ds.Union(ds.Find(currentindex), ds.Find(currentindex + 1));
       }
+      // checks down
       if (i + 1 < s->row && s->board[currentindex] == s->board[currentindex + s->column])
       {
         ds.Union(ds.Find(currentindex), ds.Find(currentindex + s->column));
@@ -147,7 +154,7 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
         continue;
 
       int root = ds.Find(currentindex);
-
+      // if the root is in the scoring set
       if (scoringset.find(root) != scoringset.end())
       {
         scoringset[root].size++;
@@ -160,6 +167,7 @@ void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metada
     }
   }
 }
+// prints the scoring sets
 void print(Superball *s, unordered_map<int, Metadata> &scoringset)
 {
   printf("Scoring sets: \n");
@@ -174,6 +182,7 @@ void print(Superball *s, unordered_map<int, Metadata> &scoringset)
       int Grow = data.scorecell / s->column ;
       int Gcol = data.scorecell % s->column ;
       char scolor = s->board[data.scorecell];
+      // cheeky way of setting sizes back to correct 
       if (data.size > 1) printf("  Size: %2d  Char: %c  Scoring Cell: %d,%d\n", data.size - 1, scolor, Grow, Gcol); 
       else printf("  Size: %2d  Char: %c  Scoring Cell: %d,%d\n", data.size, scolor, Grow, Gcol);
     }
