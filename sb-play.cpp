@@ -22,9 +22,11 @@ public:
   vector<int> goals;
   vector<int> colors;
 
-  // int getColorValue(char color);
-  // vector<pair<int, int>> getNeighbors(int r, int c);
-  // string makeScoreMove(int r, int c);
+  int getColorValue(char color);
+  bool isGoalCell(int r, int c);
+  vector<pair<int, int>> getNeighbors(int r, int c);
+  string makeSwapMove();
+  string makeScoreMove(int r, int c);
 };
 
 void usage(const char *s)
@@ -118,64 +120,68 @@ void swap(int &a, int &b)
   b = temp;
 }
 
-// int Superball::getColorValue(char color)
-// {
-//   return colors[color];
-// }
+int Superball::getColorValue(char color)
+{
+  return colors[color];
+}
 
-// vector<pair<int, int>> Superball::getNeighbors(int r, int c)
-// {
-//   vector<pair<int, int>> neighbors;
-//   int dr[] = {-1, 1, 0, 0};
-//   int dc[] = {0, 0, -1, 1};
+bool Superball::isGoalCell(int r, int c)
+{
+  return goals[r * column + c] == 1;
+}
 
-//   for (int i = 0; i < 4; ++i)
-//   {
-//     int nr = r + dr[i];
-//     int nc = c + dc[i];
-//     if (nr >= 0 && nr < row && nc >= 0 && nc < column)
-//     {
-//       neighbors.push_back(make_pair(nr, nc));
-//     }
-//   }
-//   return neighbors;
-// }
+vector<pair<int, int>> Superball::getNeighbors(int r, int c)
+{
+  vector<pair<int, int>> neighbors;
+  int dr[] = {-1, 1, 0, 0};
+  int dc[] = {0, 0, -1, 1};
 
-// string Superball::makeSwapMove()
-// {
-//   vector<pair<int, int>> non_empty_cells;
-//   for (int i = 0; i < row; ++i)
-//   {
-//     for (int j = 0; j < column; ++j)
-//     {
-//       if (board[i * column + j] != '.' && board[i * column + j] != '*')
-//       {
-//         non_empty_cells.push_back(make_pair(i, j));
-//       }
-//     }
-//   }
+  for (int i = 0; i < 4; ++i)
+  {
+    int nr = r + dr[i];
+    int nc = c + dc[i];
+    if (nr >= 0 && nr < row && nc >= 0 && nc < column)
+    {
+      neighbors.push_back(make_pair(nr, nc));
+    }
+  }
+  return neighbors;
+}
 
-//   if ((int)non_empty_cells.size() < 2)
-//   {
-//     return "SWAP 0 0 0 1"; // dummy swap to end game, if less than 2 non-empty cells available
-//   }
+string Superball::makeSwapMove()
+{
+  vector<pair<int, int>> non_empty_cells;
+  for (int i = 0; i < row; ++i)
+  {
+    for (int j = 0; j < column; ++j)
+    {
+      if (board[i * column + j] != '.' && board[i * column + j] != '*')
+      {
+        non_empty_cells.push_back(make_pair(i, j));
+      }
+    }
+  }
 
-//   int index1 = rand() % non_empty_cells.size();
-//   int index2 = rand() % non_empty_cells.size();
-//   while (index2 == index1)
-//   {
-//     index2 = rand() % non_empty_cells.size();
-//   }
+  if ((int)non_empty_cells.size() < 2)
+  {
+    return "SWAP 0 0 0 1"; // dummy swap to end game, if less than 2 non-empty cells available
+  }
 
-//   return "SWAP " + to_string(non_empty_cells[index1].first) + " " + to_string(non_empty_cells[index1].second) + " " +
-//        to_string(non_empty_cells[index2].first) + " " + to_string(non_empty_cells[index2].second);
-// }
+  int index1 = rand() % non_empty_cells.size();
+  int index2 = rand() % non_empty_cells.size();
+  while (index2 == index1)
+  {
+    index2 = rand() % non_empty_cells.size();
+  }
 
-// string Superball::makeScoreMove(int r, int c)
-// {
-//   return "SCORE " + to_string(r) + " " + to_string(c);
-// }
+  return "SWAP " + to_string(non_empty_cells[index1].first) + " " + to_string(non_empty_cells[index1].second) + " " +
+       to_string(non_empty_cells[index2].first) + " " + to_string(non_empty_cells[index2].second);
+}
 
+string Superball::makeScoreMove(int r, int c)
+{
+  return "SCORE " + to_string(r) + " " + to_string(c);
+}
 // Function to analyze the superball board and update the scoring sets
 void sbanalyze(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadata> &scoringset, unordered_map<int, int> &scoringcell)
 {
@@ -252,15 +258,19 @@ void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadat
     }
   }
 
-    if (bestscore - 1 >= s->mss && bestscorecell != -1)
+  // If we found a valid scoring move, take it
+  if (bestscore -1 >= s->mss && bestscorecell != -1)
   {
     int scoreRow = bestscorecell / s->column;
     int scoreCol = bestscorecell % s->column;
+
     cout << "SCORE " << scoreRow << " " << scoreCol << endl;
     return;
   }
 
-    int swapI = -1, swapJ = -1, swapX = -1, swapY = -1;
+  // If no immediate scoring, look for best swap
+  int swapI = -1, swapJ = -1;
+  int swapX = -1, swapY = -1;
   int bestSwapScore = -1;
 
   // Collect all cells that have pieces
@@ -306,7 +316,6 @@ void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadat
 
       // Evaluate this position
       int swapval = 0;
-      bool canScoreNextTurn = false;
 
       unordered_map<int, Metadata>::iterator it2;
       for (it2 = scoreset.begin(); it2 != scoreset.end(); ++it2)
@@ -321,21 +330,10 @@ void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadat
           // Also give value to growing sets that might become scorable later
           swapval += it2->second.size * 10;
         }
-        else if (it2->second.size >= s->mss - 1)
-        {
-          // Check if the swap can lead to a scoring move in the next turn
-          canScoreNextTurn = true;
-          swapval += it2->second.size * 100;
-        }
-        else
-        {
-          // Prioritize swaps that will potentially clear the most space
-          swapval += it2->second.size;
-        }
       }
 
       // If this swap is better, remember it
-      if (swapval > bestSwapScore || (canScoreNextTurn && swapval == bestSwapScore))
+      if (swapval > bestSwapScore)
       {
         bestSwapScore = swapval;
         swapI = i1;
@@ -350,14 +348,11 @@ void bestmove(Superball *s, DisjointSetByRankWPC &ds, unordered_map<int, Metadat
   }
 
   // If we found a good swap, do it
-  if (swapI != -1 && swapJ != -1 && swapX != -1 && swapY != -1)
+  if (swapI != -1)
   {
     cout << "SWAP " << swapI << " " << swapJ << " " << swapX << " " << swapY << endl;
   }
 }
-
-// Let me know if you want me to refine this further! 🚀
-
 
 void printBoard(Superball *s)
 {
@@ -378,11 +373,11 @@ void printBoard(Superball *s)
 
 int main(int argc, char **argv)
 {
-  Superball *s = new Superball(argc, argv);
+  Superball *s;
+  s = new Superball(argc, argv);
   DisjointSetByRankWPC ds(s->row * s->column);
   unordered_map<int, Metadata> scoringset;
   unordered_map<int, int> scoringcell;
-
   for (int i = 0; i < 100; i++)
   {
     sbanalyze(s, ds, scoringset, scoringcell);
